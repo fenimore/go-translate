@@ -10,6 +10,8 @@ import (
 	"strings"
 	"github.com/fatih/color"
 	"bufio"
+	"golang.org/x/net/html"
+	"bytes"
 )
 
 var phrase string
@@ -56,6 +58,9 @@ func main() {
 	if err != nil {
 		fmt.Println("What?", err)
 	}
+
+	// Get Word Reference
+	_ = GetWordReference(phrase)
 	
 	// Get XML translation
 	t, err := GetYandexXml(phrase, conf.Yandex)
@@ -125,4 +130,51 @@ func GetYandexXml(phrase, yandex string) ([]byte, error) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	return body, nil
 }
-		
+
+func GetWordReference(phrase string) []string {
+	var words []string
+	url := "http://www.wordreference.com/enfr/"+phrase
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("WR error: ", err)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	
+	doc, err := html.Parse(bytes.NewReader(body))
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(doc.Data)
+
+	var htmlTag = doc.FirstChild.NextSibling
+	//var bod *html.Node
+	for s := htmlTag.FirstChild; s != nil; s = s.NextSibling {
+		fmt.Println(s.Data)
+	}
+
+
+	
+	z := html.NewTokenizer(resp.Body)
+	for {
+		tt := z.Next()
+		switch {
+		case tt == html.ErrorToken:
+			return words // end of doc
+		case tt == html.StartTagToken:
+			t := z.Token()
+			isTd := t.Data == "td"
+			//isToWrd := t.Attr
+			if isTd && len(t.Attr) > 0 {
+				for _, a := range t.Attr {
+					//fmt.Println(a.Key, a.Val)
+					if a.Val == "ToWrd"{
+						fmt.Println(a.Namespace)
+					}
+				}
+				//fmt.Println("Found Td", t.Attr)
+			}
+		}
+	}
+	return words
+}
