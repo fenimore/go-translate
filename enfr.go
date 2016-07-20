@@ -11,7 +11,6 @@ import (
 	"github.com/fatih/color"
 	"bufio"
 	"golang.org/x/net/html"
-	"bytes"
 )
 
 var phrase string
@@ -139,42 +138,49 @@ func GetWordReference(phrase string) []string {
 		fmt.Println("WR error: ", err)
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	
-	doc, err := html.Parse(bytes.NewReader(body))
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(doc.Data)
-
-	var htmlTag = doc.FirstChild.NextSibling
-	//var bod *html.Node
-	for s := htmlTag.FirstChild; s != nil; s = s.NextSibling {
-		fmt.Println(s.Data)
-	}
-
-
+	//body, _ := ioutil.ReadAll(resp.Body)
 	
 	z := html.NewTokenizer(resp.Body)
+	// Find all ToWrd values
+LoopWords:
 	for {
 		tt := z.Next()
 		switch {
 		case tt == html.ErrorToken:
-			return words // end of doc
+			break LoopWords
 		case tt == html.StartTagToken:
 			t := z.Token()
 			isTd := t.Data == "td"
 			//isToWrd := t.Attr
 			if isTd && len(t.Attr) > 0 {
 				for _, a := range t.Attr {
-					//fmt.Println(a.Key, a.Val)
 					if a.Val == "ToWrd"{
-						fmt.Println(a.Namespace)
+						inner := z.Next()
+						if inner == html.TextToken {
+							text := (string)(z.Text())
+							text = strings.Trim(text, " ")
+							if text == "French" {
+								continue
+							}
+							words = AppendIfMissing(words, text)
+						}
 					}
 				}
-				//fmt.Println("Found Td", t.Attr)
 			}
 		}
 	}
+	for _, x := range words {
+		fmt.Print(x, ", ")
+	}
 	return words
+}
+
+
+func AppendIfMissing(slice []string, i string) []string {
+    for _, ele := range slice {
+	    if ele == i {
+		    return slice
+	    }	    
+    } // else append to slice
+    return append(slice, i)
 }
