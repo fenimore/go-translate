@@ -104,7 +104,7 @@ func main() {
 }
 
 func GetGlosbeJson(phrase string) []byte {
-	url := "https://glosbe.com/gapi/tm?from=eng&dest=fra&format=json&phrase="+phrase+"&page=1&pretty=true"
+	url := "https://glosbe.com/gapi/tm?from=fra&dest=eng&format=json&phrase="+phrase+"&page=1&pretty=true"
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
@@ -115,7 +115,7 @@ func GetGlosbeJson(phrase string) []byte {
 }
 
 func GetYandexXml(phrase, yandex string) ([]byte, error) {
-	url := "https://translate.yandex.net/api/v1.5/tr/translate?lang=en-fr&text="+phrase+"&key=" + yandex
+	url := "https://translate.yandex.net/api/v1.5/tr/translate?lang=fr-en&text="+phrase+"&key=" + yandex
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
