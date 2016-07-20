@@ -54,7 +54,7 @@ func main() {
 	conf := Configuration{}
 	err := decoder.Decode(&conf)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("What?", err)
 	}
 	
 	// Get XML translation

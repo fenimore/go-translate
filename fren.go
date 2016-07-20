@@ -73,7 +73,7 @@ func main() {
 		fmt.Println(err)
 	}
 	// Print Translation
-	fmt.Printf("\n\nEN-FR:     %s \n", from(phrase))
+	fmt.Printf("\n\nFR-EN:     %s \n", from(phrase))
 	fmt.Printf("Translate: %s \n", to(translate.Text))
 	
 		
