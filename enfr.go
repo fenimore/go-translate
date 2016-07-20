@@ -27,6 +27,10 @@ type Example struct {
 	Second string `json:"second"`
 }
 
+type Configuration struct {
+	Yandex string
+}
+
 // make the api call. 
 func main() {
 	// Var Args Colors
@@ -38,10 +42,20 @@ func main() {
 	toDefine := color.New(color.Bold, color.FgGreen).PrintFunc()
 	//red := color.New(color.FgRed).SprintFunc()
 	//fmt.Printf(phrase + "%s", red(phrase))
+
+	// Load Config
+	file, _ := os.Open("conf.json")
+	decoder := json.NewDecoder(file)
+	configuration := Configuration{}
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(configuration.Yandex)
 	
 	// Get JSON
 	b := GetJson(phrase)
-	err := json.Unmarshal(b, &search)
+	err = json.Unmarshal(b, &search)
 	if err != nil {
 		fmt.Println(err)
 	}
