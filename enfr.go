@@ -1,3 +1,8 @@
+// go-translate
+// Fenimore Love 2016
+// MIT License
+// Uses Glosbe translation API
+// and Wordreference data
 package main
 
 import (
@@ -68,10 +73,10 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	for i := 1; i < len(search.Examples); i++ {
 		fmt.Printf("More %d/%d? [y] ", i, len(search.Examples))
-		
+		// TODO: Add Inflection?
 		scroll, _ := reader.ReadString('\n')
 		scroll = strings.TrimRight(scroll, "\r\n")
-		fmt.Printf("\n=======from %s to %s\n", from(phrase), to(translation))
+		fmt.Printf("\n    from %s to %s\n", from(phrase), to(translation))
 		// Take Input?
 		if scroll == "y"{
 			scaff("From: ")

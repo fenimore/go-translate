@@ -1,3 +1,8 @@
+// go-translate
+// Fenimore Love 2016
+// MIT License
+// Uses Glosbe translation API
+// and Wordreference data
 package main
 
 import (
@@ -77,8 +82,8 @@ func main() {
 		
 		scroll, _ := reader.ReadString('\n')
 		scroll = strings.TrimRight(scroll, "\r\n")
-		fmt.Printf("\n<--from %s to %s-->\n", from(phrase), to(translation))
-		// Take Input?
+		fmt.Printf("\n    from %s to %s\n", from(phrase), to(translation))
+		// Take Input
 		if scroll == "y"{
 			scaff("From: ")
 			fmt.Println(search.Examples[i].First)
