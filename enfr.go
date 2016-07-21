@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"net/http"
 	"fmt"
 	"io/ioutil"
@@ -28,47 +27,23 @@ type Example struct {
 	Second string `json:"second"`
 }
 
-type Translation struct {
-	Text string `xml:"text"`
-}
-
-type Configuration struct {
-	Yandex string
-}
-
 // make the api call. 
 func main() {
 	// Var Args Colors
 	var search Define
-	var translate Translation
+	var words []string
+	var err error
 	args := os.Args[1:]
 	phrase = args[0]
 
 	scaff := color.New(color.Bold, color.FgBlue).PrintlnFunc()
-	from := color.New(color.Bold, color.FgGreen).SprintFunc()
+	from := color.New(color.Bold, color.FgMagenta).SprintFunc()
 	to := color.New(color.Bold, color.FgRed).SprintFunc()
-	//fmt.Printf(phrase + "%s", red(phrase))
-
-	// Load Config
-	file, _ := os.Open("conf.json")
-	decoder := json.NewDecoder(file)
-	conf := Configuration{}
-	err := decoder.Decode(&conf)
-	if err != nil {
-		fmt.Println("What?", err)
-	}
+	def := color.New(color.FgGreen).SprintFunc()
 
 	// Get Word Reference
-	_ = GetWordReference(phrase)
-	
-	// Get XML translation
-	t, err := GetYandexXml(phrase, conf.Yandex)
-	if err != nil {
-		fmt.Println("Invalid key")
-		translate.Text = ""
-	} else {
-		err = xml.Unmarshal(t, &translate)
-	}
+	words = GetWordReference(phrase)
+	translation := words[0]
 	
 	// Get JSON examples
 	b := GetGlosbeJson(phrase)
@@ -76,11 +51,15 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	// Print Word Parellels
+	for _, w := range words {
+		fmt.Printf("%s, ", def(w))
+	}
+	fmt.Print("\n")
 	// Print Translation
-	fmt.Printf("\n\nEN-FR:     %s \n", from(phrase))
-	fmt.Printf("Translate: %s \n", to(translate.Text))
-	
-		
+	fmt.Printf("\nEN-FR:     %s \n", from(phrase))
+	fmt.Printf("Translate: %s \n", to(translation))
+	// Print Translated Sentence	
 	scaff("From: ")
 	fmt.Println(search.Examples[0].First)
 	scaff("To:   ")
@@ -92,7 +71,7 @@ func main() {
 		
 		scroll, _ := reader.ReadString('\n')
 		scroll = strings.TrimRight(scroll, "\r\n")
-		fmt.Printf("\n=======from %s to %s\n", from(phrase), to(translate.Text))
+		fmt.Printf("\n=======from %s to %s\n", from(phrase), to(translation))
 		// Take Input?
 		if scroll == "y"{
 			scaff("From: ")
@@ -138,7 +117,6 @@ func GetWordReference(phrase string) []string {
 		fmt.Println("WR error: ", err)
 	}
 	defer resp.Body.Close()
-	//body, _ := ioutil.ReadAll(resp.Body)
 	
 	z := html.NewTokenizer(resp.Body)
 	// Find all ToWrd values
@@ -168,9 +146,6 @@ LoopWords:
 				}
 			}
 		}
-	}
-	for _, x := range words {
-		fmt.Print(x, ", ")
 	}
 	return words
 }
