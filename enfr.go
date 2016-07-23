@@ -64,7 +64,11 @@ func main() {
 	// Print Translation
 	fmt.Printf("\nEN-FR:     %s \n", from(phrase))
 	fmt.Printf("Translate: %s \n", to(translation))
-	// Print Translated Sentence	
+	// Print Translated Sentence
+	if len(search.Examples) == 0 {
+		fmt.Println("No examples available")
+		return
+	}
 	scaff("From: ")
 	fmt.Println(search.Examples[0].First)
 	scaff("To:   ")
@@ -78,7 +82,7 @@ func main() {
 		scroll = strings.TrimRight(scroll, "\r\n")
 		fmt.Printf("\n    from %s to %s\n", from(phrase), to(translation))
 		// Take Input?
-		if scroll == "y"{
+		if scroll == "y" {
 			scaff("From: ")
 			fmt.Println(search.Examples[i].First)
 			scaff("To:   ")

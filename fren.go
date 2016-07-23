@@ -70,6 +70,10 @@ func main() {
 	if conj != "" {
 		color.Red(conj)		
 	}
+	if len(search.Examples) == 0 {
+		fmt.Println("No examples available")
+		return
+	}
 	// Print Translated Sentence	
 	scaff("From: ")
 	fmt.Println(search.Examples[0].First)
