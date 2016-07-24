@@ -152,7 +152,17 @@ LoopWords:
 
 func (d *Definition) GlosbeExamples(phrase string) error {
 	var search Glosbe
-	url := "https://glosbe.com/gapi/tm?from=eng&dest=fra&format=json&phrase="+phrase+"&page=1&pretty=true"
+	var from string
+	var to string
+	if d.Lang == "f" {
+		from = "fra"
+		to = "eng"
+	} else if d.Lang == "e" {
+		from = "eng"
+		to = "fra"
+	}
+	url := "https://glosbe.com/gapi/tm?from="+from+"&dest="+to+
+		"&format=json&phrase="+phrase+"&page=1&pretty=true"
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
