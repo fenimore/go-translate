@@ -47,20 +47,19 @@ func main() {
 	fromColor := color.New(color.Bold, color.FgMagenta).SprintFunc()
 	toColor := color.New(color.Bold, color.FgRed).SprintFunc()
 	defColor := color.New(color.FgGreen).SprintFunc()
-
+	// Define From and To target Language
 	var definition Definition
 	if language == "f" {
 		definition.Lang = "fren"
 	} else if language == "e" {
 		definition.Lang = "enfr"
 	}
-
+	// First Get Target Word Translations
 	err = definition.WordReference(phrase)
 	if err != nil {
 		fmt.Printf("[WR error: %s]", err)
 	}
 	fmt.Println("\n")
-	// Print Words
 	for _, w := range definition.Words {
 		fmt.Printf("%s, ", defColor(w))
 	}
@@ -71,6 +70,7 @@ func main() {
 		color.Red(definition.Conjugation)
 	}
 	// Examples Sentences, if desired
+	// TODO: Highlight target words?
 	fmt.Print("Voir examples? [y]")
 	show, _ := reader.ReadString('\n')
 	show = strings.TrimRight(show, "\n\r")
@@ -148,7 +148,7 @@ LoopWords:
 						if inner == html.TextToken {
 							text := (string)(z.Text())
 							text = strings.Trim(text, " ")
-							if text == "English" || text == "French" {
+							if text == "English" || text == "French" { // Could this be a bug?
 								continue
 							} 
 							words = AppendIfMissing(words, text)
