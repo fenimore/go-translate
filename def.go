@@ -73,8 +73,9 @@ func main() {
 	// Examples Sentences, if desired
 	fmt.Print("Voir examples? [y]")
 	show, _ := reader.ReadString('\n')
-	show = strings.TrimRight(show, "\r\n")
-	if show != "y" || show != "yes" {
+	fmt.Println(show)
+	show = strings.TrimRight(show, "\n\r")
+	if show != "y" {
 		return // End of Program
 	}
 	err = definition.GlosbeExamples(phrase)
@@ -198,8 +199,7 @@ func (d *Definition) GlosbeExamples(phrase string) error {
 		from = "eng"
 		to = "fra"
 	}
-	url := "https://glosbe.com/gapi/tm?from="+from+"&dest="+to+
-		"&format=json&phrase="+phrase+"&page=1&pretty=true"
+	url := "https://glosbe.com/gapi/tm?from="+from+"&dest="+to+"&format=json&phrase="+phrase+"&page=1&pretty=true"
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
