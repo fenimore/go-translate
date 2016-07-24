@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-type Globse struct {
+type Glosbe struct {
 	Result string `json:"result"`
 	Found int `json:"found"`
 	Examples []Example `json:"examples"`
@@ -30,12 +30,8 @@ type Definition struct {
 	Words []string     // All word parellels
 	Conj string        // Conjugation info
 	Translation string // Primary parellel
-	Examples []string  // Example sentences
+	Examples Glosbe
 }
-
-
-
-
 
 func main() {
 	//var search Define
@@ -151,4 +147,26 @@ LoopWords:
 	d.Conj = conjugation
 	d.Translation = words[0]
 	return nil
+}
+
+
+func (d *Definition) GetGlosbeJson(phrase string) error {
+	var search Glosbe
+	url := "https://glosbe.com/gapi/tm?from=eng&dest=fra&format=json&phrase="+phrase+"&page=1&pretty=true"
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	err = json.Unmarshal(b, &search)
+	if err != nil {
+		return err
+	}
+	if len(search.Examples) == 0 {
+		return errors.New("Desolé, no examples found...")
+	} else {
+		d.Glosbe = search
+	}
 }
