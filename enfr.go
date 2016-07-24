@@ -1,4 +1,4 @@
-// go-translate
+/ go-translate
 // Fenimore Love 2016
 // MIT License
 // Uses Glosbe translation API

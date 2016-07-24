@@ -73,7 +73,6 @@ func main() {
 	// Examples Sentences, if desired
 	fmt.Print("Voir examples? [y]")
 	show, _ := reader.ReadString('\n')
-	fmt.Println(show)
 	show = strings.TrimRight(show, "\n\r")
 	if show != "y" {
 		return // End of Program
@@ -149,9 +148,9 @@ LoopWords:
 						if inner == html.TextToken {
 							text := (string)(z.Text())
 							text = strings.Trim(text, " ")
-							if text == "English" {
+							if text == "English" || text == "French" {
 								continue
-							}
+							} 
 							words = AppendIfMissing(words, text)
 						}
 					}
