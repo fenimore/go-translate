@@ -41,6 +41,8 @@ func main() {
 	args := os.Args[1:]
 	phrase = args[0]
 
+	reader := bufio.NewReader(os.Stdin)
+	
 	scaff := color.New(color.Bold, color.FgBlue).PrintlnFunc()
 	from := color.New(color.Bold, color.FgMagenta).SprintFunc()
 	to := color.New(color.Bold, color.FgRed).SprintFunc()
@@ -50,12 +52,6 @@ func main() {
 	words = GetWordReference(phrase)
 	translation := words[0]
 	
-	// Get JSON examples
-	b := GetGlosbeJson(phrase)
-	err = json.Unmarshal(b, &search)
-	if err != nil {
-		fmt.Println(err)
-	}
 	// Print Word Parellels
 	for _, w := range words {
 		fmt.Printf("%s, ", def(w))
@@ -64,6 +60,19 @@ func main() {
 	// Print Translation
 	fmt.Printf("\nEN-FR:     %s \n", from(phrase))
 	fmt.Printf("Translate: %s \n", to(translation))
+
+	fmt.Print("Show examples phrases?[y]")
+	examps, _ := reader.ReadString('\n')
+	examps = strings.TrimRight(examps, "\r\n")
+	if examps != "y" {
+		return
+	}
+	// Get JSON examples
+	b := GetGlosbeJson(phrase)
+	err = json.Unmarshal(b, &search)
+	if err != nil {
+		fmt.Println(err)
+	}
 	// Print Translated Sentence
 	if len(search.Examples) == 0 {
 		fmt.Println("No examples available")
@@ -74,7 +83,7 @@ func main() {
 	scaff("To:   ")
 	fmt.Println(search.Examples[0].Second)
 
-	reader := bufio.NewReader(os.Stdin)
+
 	for i := 1; i < len(search.Examples); i++ {
 		fmt.Printf("More %d/%d? [y] ", i, len(search.Examples))
 		// TODO: Add Inflection?
