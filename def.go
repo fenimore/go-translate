@@ -192,10 +192,10 @@ func (d *Definition) GlosbeExamples(phrase string) error {
 	var search Glosbe
 	var from string
 	var to string
-	if d.Lang == "f" {
+	if d.Lang == "fren" {
 		from = "fra"
 		to = "eng"
-	} else if d.Lang == "e" {
+	} else if d.Lang == "enfr" {
 		from = "eng"
 		to = "fra"
 	}
