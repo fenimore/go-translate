@@ -1,10 +1,11 @@
 package main
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"net/http"
 	"fmt"
-	//"io/ioutil"
+	"errors"
+	"io/ioutil"
 	"os"
 	"strings"
 	"github.com/fatih/color"
@@ -64,10 +65,11 @@ func main() {
 		fmt.Printf("%s, ", defColor(w))
 	}
 	fmt.Println("\n")
-	fmt.Printf("\n%s:      %s \n", definition.Lang, fromColor(phrase))
+	fmt.Printf("\n%s:      %s \n", strings.ToUpper(definition.Lang), fromColor(phrase))
 	fmt.Printf("Translate: %s \n", toColor(definition.Translation))
 
-	// TODO: Examples sentences
+	// Examples Sentences, if desired
+	
 
 }
 
@@ -149,7 +151,8 @@ LoopWords:
 	return nil
 }
 
-
+// GlosbeExamples gets example translation sentences
+// from the free (libre?) Glosbe API.
 func (d *Definition) GlosbeExamples(phrase string) error {
 	var search Glosbe
 	var from string
@@ -170,7 +173,7 @@ func (d *Definition) GlosbeExamples(phrase string) error {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	err = json.Unmarshal(b, &search)
+	err = json.Unmarshal(body, &search)
 	if err != nil {
 		return err
 	}
