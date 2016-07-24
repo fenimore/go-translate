@@ -30,7 +30,7 @@ type Definition struct {
 	Words []string     // All word parellels
 	Conj string        // Conjugation info
 	Translation string // Primary parellel
-	Examples Glosbe
+	Examples []Example
 }
 
 func main() {
@@ -150,7 +150,7 @@ LoopWords:
 }
 
 
-func (d *Definition) GetGlosbeJson(phrase string) error {
+func (d *Definition) GlosbeExamples(phrase string) error {
 	var search Glosbe
 	url := "https://glosbe.com/gapi/tm?from=eng&dest=fra&format=json&phrase="+phrase+"&page=1&pretty=true"
 	resp, err := http.Get(url)
@@ -166,7 +166,7 @@ func (d *Definition) GetGlosbeJson(phrase string) error {
 	}
 	if len(search.Examples) == 0 {
 		return errors.New("Desolé, no examples found...")
-	} else {
-		d.Glosbe = search
 	}
+	d.Examples = search.Examples
+	return nil
 }
