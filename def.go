@@ -1,14 +1,14 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"net/http"
 	"fmt"
-	"io/ioutil"
+	//"io/ioutil"
 	"os"
 	"strings"
 	"github.com/fatih/color"
-	"bufio"
+	//"bufio"
 	"golang.org/x/net/html"
 )
 
@@ -26,17 +26,74 @@ type Example struct {
 
 
 type Definition struct {
-	Words []string
-	Conj string
-	Lang string
+	Lang string        // User defined, lang directions
+	Words []string     // All word parellels
+	Conj string        // Conjugation info
+	Translation string // Primary parellel
+	Examples []string  // Example sentences
 }
 
 
-func (d *Definition) GetWordReference(phrase string) {
+
+
+
+func main() {
+	//var search Define
+	var err error
+	args := os.Args[1:] // ignore the package name as arg
+	language := args[0]  // f for french to english
+	phrase := args[1]    // second args is the word to search for
+	//reader := bufio.NewReader(os.Stdin)
+
+	// Colorized outputs...
+	//scaffColor := color.New(color.Bold, color.FgBlue).PrintlnFunc()
+	fromColor := color.New(color.Bold, color.FgMagenta).SprintFunc()
+	toColor := color.New(color.Bold, color.FgRed).SprintFunc()
+	defColor := color.New(color.FgGreen).SprintFunc()
+
+	var definition Definition
+	if language == "f" {
+		definition.Lang = "fren"
+	} else if language == "e" {
+		definition.Lang = "enfr"
+	}
+
+	err = definition.WordReference(phrase)
+	if err != nil {
+		fmt.Printf("[WR error: %s]", err)
+	}
+
+	// Print Words
+	for _, w := range definition.Words {
+		fmt.Printf("%s, ", defColor(w))
+	}
+	fmt.Println("\n")
+	fmt.Printf("\n%s:      %s \n", definition.Lang, fromColor(phrase))
+	fmt.Printf("Translate: %s \n", toColor(definition.Translation))
+
+	// TODO: Examples sentences
+
+}
+
+// AppendIfMissing helper method for slices.
+func AppendIfMissing(slice []string, i string) []string {
+    for _, ele := range slice {
+	    if ele == i {
+		    return slice
+	    }	    
+    } // else append to slice
+    return append(slice, i)
+}
+
+// WordReference scrapes wordreference.com
+// for the word translations and, if exists, conjugations.
+func (d *Definition) WordReference(phrase string) error {
+	var words []string
+	var conjugation string
 	url := "http://www.wordreference.com/"+d.Lang+"/"+phrase
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("WR error: ", err)
+		return err
 	}
 	defer resp.Body.Close()
 	
@@ -92,42 +149,6 @@ LoopWords:
 	}
 	d.Words = words
 	d.Conj = conjugation
-}
-
-
-
-func main() {
-	//var search Define
-	var err error
-	args := os.Args[1:] // ignore the package name as arg
-	language = args[0]
-	phrase = args[1]
-	reader := bufio.NewReader(os.Stdin)
-
-	scaff := color.New(color.Bold, color.FgBlue).PrintlnFunc()
-	from := color.New(color.Bold, color.FgMagenta).SprintFunc()
-	to := color.New(color.Bold, color.FgRed).SprintFunc()
-	def := color.New(color.FgGreen).SprintFunc()
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-func AppendIfMissing(slice []string, i string) []string {
-    for _, ele := range slice {
-	    if ele == i {
-		    return slice
-	    }	    
-    } // else append to slice
-    return append(slice, i)
+	d.Translation = words[0]
+	return nil
 }
