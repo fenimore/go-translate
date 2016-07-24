@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 	"github.com/fatih/color"
-	//"bufio"
+	"bufio"
 	"golang.org/x/net/html"
 )
 
@@ -29,7 +29,7 @@ type Example struct {
 type Definition struct {
 	Lang string        // User defined, lang directions
 	Words []string     // All word parellels
-	Conj string        // Conjugation info
+	Conjugation string        // Conjugation info
 	Translation string // Primary parellel
 	Examples []Example
 }
@@ -40,10 +40,10 @@ func main() {
 	args := os.Args[1:] // ignore the package name as arg
 	language := args[0]  // f for french to english
 	phrase := args[1]    // second args is the word to search for
-	//reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdin)
 
 	// Colorized outputs...
-	//scaffColor := color.New(color.Bold, color.FgBlue).PrintlnFunc()
+	scaffColor := color.New(color.Bold, color.FgBlue).PrintlnFunc()
 	fromColor := color.New(color.Bold, color.FgMagenta).SprintFunc()
 	toColor := color.New(color.Bold, color.FgRed).SprintFunc()
 	defColor := color.New(color.FgGreen).SprintFunc()
@@ -59,17 +59,51 @@ func main() {
 	if err != nil {
 		fmt.Printf("[WR error: %s]", err)
 	}
-
+	fmt.Println("\n")
 	// Print Words
 	for _, w := range definition.Words {
 		fmt.Printf("%s, ", defColor(w))
 	}
-	fmt.Println("\n")
+	// Print From and To
 	fmt.Printf("\n%s:      %s \n", strings.ToUpper(definition.Lang), fromColor(phrase))
 	fmt.Printf("Translate: %s \n", toColor(definition.Translation))
-
+	if definition.Conjugation != "" {
+		color.Red(definition.Conjugation)
+	}
 	// Examples Sentences, if desired
-	
+	fmt.Print("Voir examples? [y]")
+	show, _ := reader.ReadString('\n')
+	show = strings.TrimRight(show, "\r\n")
+	if show != "y" || show != "yes" {
+		return // End of Program
+	}
+	err = definition.GlosbeExamples(phrase)
+	if err != nil {
+		fmt.Printf("[Glosbe error: %s]", err)
+	}
+	scaffColor("From: ")
+	fmt.Println(definition.Examples[0].First)
+	scaffColor("To:   ")
+	fmt.Println(definition.Examples[0].Second)
+	// Show more
+	for i := 1; i < len(definition.Examples); i++ {
+		fmt.Printf("More %d/%d? [y] ", i, len(definition.Examples))
+		// TODO: Add Inflection?
+		scroll, _ := reader.ReadString('\n')
+		scroll = strings.TrimRight(scroll, "\r\n")
+		fmt.Printf("\n    from %s to %s\n", fromColor(phrase),
+			toColor(definition.Translation))
+		// Continue to list example sentences
+		if scroll == "y" {
+			scaffColor("From: ")
+			fmt.Println(definition.Examples[i].First)
+			scaffColor("To:   ")
+			fmt.Println(definition.Examples[i].Second)
+			
+		} else {
+			break
+		}
+	}
 
 }
 
@@ -146,7 +180,7 @@ LoopWords:
 		}
 	}
 	d.Words = words
-	d.Conj = conjugation
+	d.Conjugation = conjugation
 	d.Translation = words[0]
 	return nil
 }
