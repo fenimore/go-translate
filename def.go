@@ -69,6 +69,10 @@ func main() {
 	if definition.Conjugation != "" {
 		color.Red(definition.Conjugation)
 	}
+	if definition.Inflection != "" {
+		fmt.Print("Inflections: ")
+		color.Red(definition.Inflection)
+	}
 	// Examples Sentences, if desired
 	// TODO: Highlight target words?
 	fmt.Print("Voir examples? [y]")
@@ -197,7 +201,6 @@ LoopWords:
 						}
 						inflection = strings.TrimSpace(inflection)
 						inflection = strings.TrimPrefix(inflection, "Inflections of ")
-						fmt.Println(inflection)
 						d.Inflection = inflection
 					}
 				}
