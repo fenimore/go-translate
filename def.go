@@ -73,6 +73,11 @@ func main() {
 		fmt.Print("Inflections: ")
 		color.Red(definition.Inflection)
 	}
+	// Generally there won't be conj AND infl
+	// As the former will be for verbs and
+	// the latter will be for nouns. However,
+	// there is always expections in Language.
+
 	// Examples Sentences, if desired
 	// TODO: Highlight target words?
 	fmt.Print("Voir examples? [y]")
