@@ -1,45 +1,45 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
-	"net/http"
-	"fmt"
 	"errors"
+	"fmt"
+	"github.com/fatih/color"
+	"golang.org/x/net/html"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
-	"github.com/fatih/color"
-	"bufio"
-	"golang.org/x/net/html"
 )
 
 type Glosbe struct {
-	Result string `json:"result"`
-	Found int `json:"found"`
+	Result   string    `json:"result"`
+	Found    int       `json:"found"`
 	Examples []Example `json:"examples"`
 }
 
 type Example struct {
-	Author int `json:"author"`
-	First string `json:"first"`
+	Author int    `json:"author"`
+	First  string `json:"first"`
 	Second string `json:"second"`
 }
 
-
 type Definition struct {
-	Lang string        // User defined, lang directions
-	Words []string     // All word parellels
-	Conjugation string        // Conjugation info
-	Translation string // Primary parellel
-	Examples []Example
+	Lang        string    // User defined, lang directions
+	Words       []string  // All word parellels
+	Conjugation string    // Conjugation info
+	Translation string    // Primary parellel
+	Examples    []Example // Glosbe Examples
+	Gender      string    // Gender of word
 }
 
 func main() {
 	//var search Define
 	var err error
 	args := os.Args[1:] // ignore the package name as arg
-	language := args[0]  // f for french to english
-	phrase := args[1]    // second args is the word to search for
+	language := args[0] // f for french to english
+	phrase := args[1]   // second args is the word to search for
 	reader := bufio.NewReader(os.Stdin)
 
 	// Colorized outputs...
@@ -99,7 +99,7 @@ func main() {
 			fmt.Println(definition.Examples[i].First)
 			scaffColor("To:   ")
 			fmt.Println(definition.Examples[i].Second)
-			
+
 		} else {
 			break
 		}
@@ -109,12 +109,12 @@ func main() {
 
 // AppendIfMissing helper method for slices.
 func AppendIfMissing(slice []string, i string) []string {
-    for _, ele := range slice {
-	    if ele == i {
-		    return slice
-	    }	    
-    } // else append to slice
-    return append(slice, i)
+	for _, ele := range slice {
+		if ele == i {
+			return slice
+		}
+	} // else append to slice
+	return append(slice, i)
 }
 
 // WordReference scrapes wordreference.com
@@ -122,13 +122,13 @@ func AppendIfMissing(slice []string, i string) []string {
 func (d *Definition) WordReference(phrase string) error {
 	var words []string
 	var conjugation string
-	url := "http://www.wordreference.com/"+d.Lang+"/"+phrase
+	url := "http://www.wordreference.com/" + d.Lang + "/" + phrase
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	
+
 	z := html.NewTokenizer(resp.Body)
 	// Find all ToWrd values
 LoopWords:
@@ -136,29 +136,32 @@ LoopWords:
 		tt := z.Next()
 		switch {
 		case tt == html.ErrorToken:
+			// End of Document or EOF?
 			break LoopWords
 		case tt == html.StartTagToken:
 			t := z.Token()
-			isTd := t.Data == "td"
-			isDl := t.Data == "dl"
+			isTd := t.Data == "td"     // Word Parellels table row
+			isDl := t.Data == "dl"     // dl element (weird) is conjugations
+			isSpan := t.Data == "span" // span with class POS2 is parts of speech
+			// These tokens will Indicate what part
+			// of the translation we're finding.
 			if isTd && len(t.Attr) > 0 {
+				// isTd looks for word parellels
 				for _, a := range t.Attr {
-					if a.Val == "ToWrd"{
+					if a.Val == "ToWrd" {
 						inner := z.Next()
 						if inner == html.TextToken {
 							text := (string)(z.Text())
 							text = strings.Trim(text, " ")
 							if text == "English" || text == "French" { // Could this be a bug?
 								continue
-							} 
+							}
 							words = AppendIfMissing(words, text)
 						}
 					}
 				}
 			} else if isDl {
-				// Get Conjugation of French Verbs
-
-				//_ = z.Next()
+				// isDl locates Conjugations
 				for {
 					tagName, _ := z.TagName()
 					if string(tagName) == "dl" {
@@ -173,8 +176,20 @@ LoopWords:
 					} else if c == "est:" {
 						c += "\n"
 					}
-					conjugation += c +" "
+					conjugation += c + " "
 					_ = z.Next()
+				}
+			} else if isSpan {
+				// Finding Gender by POS2 class
+				for _, a := range t.Attr {
+					if a.Val == "POS2" {
+						inner := z.Next()
+						if inner == html.TextToken {
+							text := (string)(z.Text())
+							text = strings.Trim(text, " ")
+							fmt.Println(text)
+						}
+					}
 				}
 			}
 		}
@@ -198,7 +213,7 @@ func (d *Definition) GlosbeExamples(phrase string) error {
 		from = "eng"
 		to = "fra"
 	}
-	url := "https://glosbe.com/gapi/tm?from="+from+"&dest="+to+"&format=json&phrase="+phrase+"&page=1&pretty=true"
+	url := "https://glosbe.com/gapi/tm?from=" + from + "&dest=" + to + "&format=json&phrase=" + phrase + "&page=1&pretty=true"
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
