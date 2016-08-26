@@ -31,7 +31,7 @@ type Definition struct {
 	Conjugation string    // Conjugation info
 	Translation string    // Primary parellel
 	Examples    []Example // Glosbe Examples
-	Gender      string    // Gender of word
+	Inflection  string    // POS and Gender
 }
 
 func main() {
@@ -181,7 +181,7 @@ LoopWords:
 				}
 			} else if isSpan {
 				// Finding Gender by POS2 class
-				var partOfSpeech string
+				var inflection string
 				for _, a := range t.Attr {
 					if a.Val == "strAnchors" {
 						for {
@@ -191,12 +191,14 @@ LoopWords:
 								// The POS ends on div
 								break
 							}
-							p := strings.Trim((string)(z.Text()), " ")
-
-							partOfSpeech += p + " "
+							inf := (string)(z.Text())
+							inflection += inf
 							_ = z.Next() // cycle on
 						}
-						fmt.Println(partOfSpeech)
+						inflection = strings.TrimSpace(inflection)
+						inflection = strings.TrimPrefix(inflection, "Inflections of ")
+						fmt.Println(inflection)
+						d.Inflection = inflection
 					}
 				}
 			}
