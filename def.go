@@ -142,7 +142,7 @@ LoopWords:
 			t := z.Token()
 			isTd := t.Data == "td"     // Word Parellels table row
 			isDl := t.Data == "dl"     // dl element (weird) is conjugations
-			isSpan := t.Data == "span" // span with class POS2 is parts of speech
+			isSpan := t.Data == "span" // Gender is after span with class id strAnchors
 			// These tokens will Indicate what part
 			// of the translation we're finding.
 			if isTd && len(t.Attr) > 0 {
@@ -181,14 +181,22 @@ LoopWords:
 				}
 			} else if isSpan {
 				// Finding Gender by POS2 class
+				var partOfSpeech string
 				for _, a := range t.Attr {
-					if a.Val == "POS2" {
-						inner := z.Next()
-						if inner == html.TextToken {
-							text := (string)(z.Text())
-							text = strings.Trim(text, " ")
-							fmt.Println(text)
+					if a.Val == "strAnchors" {
+						for {
+							tagName, _ := z.TagName()
+							if string(tagName) == "div" {
+								// Even though this doesn't start as div
+								// The POS ends on div
+								break
+							}
+							p := strings.Trim((string)(z.Text()), " ")
+
+							partOfSpeech += p + " "
+							_ = z.Next() // cycle on
 						}
+						fmt.Println(partOfSpeech)
 					}
 				}
 			}
